@@ -7,6 +7,9 @@ public class UIManager : MonoBehaviour
     public static UIManager Instance;
     public Text showText;
     public Text timerText;
+    public Image timerSlider;
+
+    private float time;
 
     private void Awake()
     {
@@ -21,25 +24,31 @@ public class UIManager : MonoBehaviour
     void Init()
     {
         timerText.text = "";
+        timerSlider.color = Color.yellow;
     }
 
     public void ShowTurn(string text)
     {
+        timerSlider.fillAmount = 1;
         StartCoroutine(ShowTurnCoroutine(text));
     }
 
     public void SetTime(int time, GameState state)
     {
+        this.time = time;
         switch (state)
         {
             case GameState.TypingQuestion:
-                timerText.text = "Time to Choose : " + time + " seconds";
+                timerText.text = time+"s";
                 break;
             case GameState.Answering:
-                timerText.text = "Time to Answer : " + time + " seconds";
+                timerText.text = time + "s";
                 break;
         }
 
+        float amount = (float)time;
+        //timerSlider.fillAmount = amount * .1f * 2;
+        timerSlider.fillAmount = amount * .1f;
     }
 
     IEnumerator ShowTurnCoroutine(string text)

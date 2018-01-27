@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
+using DG.Tweening;
 
 public enum GameState { MainScreen, Options, Answering, TypingQuestion, DisableActions, GameOver, Paused }
 public enum Difficulty {  Easy, Medium, Hard }
@@ -11,6 +12,7 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
     public Turn currentTurn;
+    public Turn playerWithActiveInputField;
     public GameState currentGameState;
     public Difficulty currentDifficulty = Difficulty.Medium;
     public Fort player1;
@@ -34,6 +36,7 @@ public class GameManager : MonoBehaviour
     private void Start()
     {
         Init();
+        
     }
 
     private void Update()
@@ -52,6 +55,7 @@ public class GameManager : MonoBehaviour
 
     void Init()
     {
+        playerWithActiveInputField = Turn.PlayerA;
         currentTimerTime = startingTimerTime;
 
         if (currentDifficulty == Difficulty.Easy)
@@ -86,8 +90,7 @@ public class GameManager : MonoBehaviour
 
     void CountdownTimer()
     {
-        if (currentTimerTime < 0) return;
-        
+        if (currentTimerTime < 0) return;        
 
         // jika soal / jawaban kosong
         if(currentTimerTime == 0)
@@ -95,49 +98,43 @@ public class GameManager : MonoBehaviour
             CancelInvoke("CountdownTimer");
             if(currentTurn == Turn.PlayerA)
             {
-                //if(player2.typingMode == GameState.Answering)
-                //{
-                //    player1.Attack(player2);
-                //    currentTurn = Turn.PlayerB;
-                //    //player1.typingMode = GameState.TypingQuestion;
-                //    //player2.typingMode = GameState.Answering;
-                //}
-
-                //if (player2.typingMode == GameState.TypingQuestion)
-                //{
-                //    player2.Attack(player1);
-
-                //}
-
                 if(player1.typingMode == GameState.TypingQuestion)
                 {
-                    player2.Attack(player1);
+                    if(currentTurn != playerWithActiveInputField)
+                    {
+                        player2.Attack(player1);
+                        currentTurn = Turn.PlayerB;
+                    }
+                    else
+                    {
+                        player1.Attack(player2);
+                    }
                     currentTurn = Turn.PlayerB;
+                    playerWithActiveInputField = currentTurn;
                 }
             }
 
             else if (currentTurn == Turn.PlayerB)
             {
-                //if (player1.typingMode == GameState.Answering)
-                //{
-
-                //    player2.Attack(player1);
-                //    currentTurn = Turn.PlayerA;
-                //    //player1.typingMode = GameState.Answering;
-                //    //player2.typingMode = GameState.TypingQuestion;
-                //}   
-
-                //if(player1.typingMode == GameState.TypingQuestion)
+                //if (player2.typingMode == GameState.TypingQuestion)
                 //{
                 //    player1.Attack(player2);
-
-
+                //    currentTurn = Turn.PlayerA;
                 //}
 
                 if (player2.typingMode == GameState.TypingQuestion)
                 {
-                    player1.Attack(player2);
+                    if (currentTurn != playerWithActiveInputField)
+                    {
+                        player1.Attack(player2);
+                        currentTurn = Turn.PlayerB;
+                    }
+                    else
+                    {
+                        player2.Attack(player1);
+                    }
                     currentTurn = Turn.PlayerA;
+                    playerWithActiveInputField = currentTurn;
                 }
             }
 
@@ -219,6 +216,7 @@ public class GameManager : MonoBehaviour
 
     public void CheckAnswer(string answer = "", bool resetTimer = false)
     {
+        Debug.Log(answer);
         CancelInvoke("CountdownTimer");
         answer = answer.ToLower();
         Debug.Log("answer : " + answer + "---" + "correct : " + correctAnswer);
