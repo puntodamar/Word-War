@@ -35,7 +35,6 @@ public class Fort : MonoBehaviour
         {
             Random.InitState(System.DateTime.Now.Millisecond);
             int randomIndex = Random.Range(0, warriorSprites.Length);
-            Debug.Log(randomIndex);
             warriorStandingPosition[i].sprite = warriorSprites[randomIndex];
         }
     }
@@ -48,8 +47,23 @@ public class Fort : MonoBehaviour
     public void TakeDamage(int damage)
     {
         StartCoroutine(SubstractHealth(fortHealth, damage));
-        StartCoroutine(FrontWarriorDead());
+        //ChangeWarriorQueue();
+        
         fortHealth = Mathf.Clamp(fortHealth -= damage, 0, fortHealth);
+        if (fortHealth <= 0)
+            GameManager.Instance.currentGameState = GameState.GameOver;
+
+
+    }
+
+    void ChangeWarriorQueue()
+    {
+        warriorStandingPosition[0].GetComponent<SpriteRenderer>().color = Color.clear;
+        Random.InitState(System.DateTime.Now.Millisecond);
+        int randomIndex = Random.Range(0, warriorSprites.Length);
+        warriorStandingPosition[0].sprite = warriorStandingPosition[0].sprite;
+        warriorStandingPosition[1].sprite = warriorStandingPosition[1].sprite;
+        warriorStandingPosition[2].sprite = warriorSprites[randomIndex];
     }
 
     IEnumerator SubstractHealth(int health, int damage)
@@ -63,24 +77,26 @@ public class Fort : MonoBehaviour
             healthText.text = oldHealth + "%";
             healthSlider.fillAmount = oldHealth / 100;
             healthSlider.color = Color.Lerp(Color.red, Color.green, oldHealth / 100);
-            yield return new WaitForSeconds(.05f);
+            yield return null;
         }
 
+        GameManager.Instance.CheckDeath();
         
         //StartCoroutine(Shake());
     }
 
-    IEnumerator FrontWarriorDead()
-    {
+    //IEnumerator FrontWarriorDead()
+    //{
+    //    Color color = warriorStandingPosition[0].GetComponent<SpriteRenderer>().color;
+    //    Color start = color;
+    //    while(color.a > 0)
+    //    {
+    //        Debug.Log(color.a);
 
-        Color tmp = warriorStandingPosition[0].GetComponent<SpriteRenderer>().color;
-        while(tmp.a > 0)
-        {
-            Color.Lerp(tmp, Color.clear, .5f);
-            warriorStandingPosition[0].GetComponent<SpriteRenderer>().color = tmp;
-            yield return null;
-        }
-    }
+    //        color = Color.Lerp(color, Color.clear, .01f);
+    //        yield return null;
+    //    }
+    //}
 
     void MoveSoldier()
     {

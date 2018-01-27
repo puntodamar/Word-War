@@ -25,7 +25,7 @@ public class InputManager : MonoBehaviour
 
     public void ShowPlayerInputField(Turn turn, GameState player1TypingMode, GameState player2TypingMode)
     {
-
+        if (GameManager.Instance.currentGameState == GameState.GameOver) return;
         if (turn == Turn.PlayerA)
         {
             inputWordPA.SetActive(true);

@@ -13,7 +13,7 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance;
     public Turn currentTurn;
     public Turn playerWithActiveInputField;
-    public GameState currentGameState;
+    public GameState currentGameState = GameState.MainScreen;
     public Difficulty currentDifficulty = Difficulty.Medium;
     public Fort player1;
     public Fort player2;
@@ -35,13 +35,14 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
+        //Invoke("Init", 2);
         Init();
         
     }
 
     private void Update()
     {
-        if (!isTimerActive)
+        if (!isTimerActive && currentGameState != GameState.MainScreen)
         {
             if(currentGameState == GameState.TypingQuestion || currentGameState == GameState.Answering)
             {
@@ -55,8 +56,10 @@ public class GameManager : MonoBehaviour
 
     void Init()
     {
-        playerWithActiveInputField = Turn.PlayerA;
-        currentTimerTime = startingTimerTime;
+        //UIManager.Instance.ShowUI();
+        playerWithActiveInputField  = Turn.PlayerA;
+        currentTimerTime            = startingTimerTime;
+        currentDifficulty           = (Difficulty)PlayerPrefs.GetInt("difficulty");
 
         if (currentDifficulty == Difficulty.Easy)
             difficultyPercentage      = .1f;
@@ -67,9 +70,9 @@ public class GameManager : MonoBehaviour
 
         currentGameState = GameState.TypingQuestion;
         SwapTypingMode();
-        
-        //UpdateLastPlayingState();
 
+        //UpdateLastPlayingState();
+        
         StartCoroutine(PlayTurn());
     }
 
@@ -102,12 +105,14 @@ public class GameManager : MonoBehaviour
                 {
                     if(currentTurn != playerWithActiveInputField)
                     {
+                        UIManager.Instance.ShowInfo(Turn.PlayerB + " launched an attack!", Color.red);
                         player2.Attack(player1);
                         currentTurn = Turn.PlayerB;
                     }
                     else
                     {
                         player1.Attack(player2);
+                        UIManager.Instance.ShowInfo("Attack successfull!", Color.green);
                     }
                     currentTurn = Turn.PlayerB;
                     playerWithActiveInputField = currentTurn;
@@ -116,22 +121,19 @@ public class GameManager : MonoBehaviour
 
             else if (currentTurn == Turn.PlayerB)
             {
-                //if (player2.typingMode == GameState.TypingQuestion)
-                //{
-                //    player1.Attack(player2);
-                //    currentTurn = Turn.PlayerA;
-                //}
 
                 if (player2.typingMode == GameState.TypingQuestion)
                 {
                     if (currentTurn != playerWithActiveInputField)
                     {
+                        UIManager.Instance.ShowInfo(Turn.PlayerA + " launched an attack!", Color.red);
                         player1.Attack(player2);
                         currentTurn = Turn.PlayerB;
                     }
                     else
                     {
                         player2.Attack(player1);
+                        UIManager.Instance.ShowInfo("Attack successfull!", Color.green);
                     }
                     currentTurn = Turn.PlayerA;
                     playerWithActiveInputField = currentTurn;
@@ -216,23 +218,23 @@ public class GameManager : MonoBehaviour
 
     public void CheckAnswer(string answer = "", bool resetTimer = false)
     {
-        Debug.Log(answer);
         CancelInvoke("CountdownTimer");
         answer = answer.ToLower();
         Debug.Log("answer : " + answer + "---" + "correct : " + correctAnswer);
 
         if (currentTurn == Turn.PlayerA)
         {
-            Debug.Log("a");
             // jika salah
             if (answer != correctAnswer || answer == "")
             {
+                UIManager.Instance.ShowInfo("Failed to dechiper intel !", Color.red);
                 player1.Attack(player2);
             }
 
             // jika benar
             else if (answer == correctAnswer)
             {
+                UIManager.Instance.ShowInfo("Intel dechipered!", Color.green);
                 player2.Attack(player1);
 
             }
@@ -244,16 +246,17 @@ public class GameManager : MonoBehaviour
 
         else if(currentTurn == Turn.PlayerB)
         {
-            Debug.Log("b");
             // jika salah
             if (answer != correctAnswer || answer == "")
             {
+                UIManager.Instance.ShowInfo("Failed to dechiper intel !", Color.red);
                 player2.Attack(player1);
             }
 
             // jika benar
             else if (answer == correctAnswer)
             {
+                UIManager.Instance.ShowInfo("Intel dechipered!", Color.green);
                 player1.Attack(player2);
             }
 
@@ -261,19 +264,15 @@ public class GameManager : MonoBehaviour
             player2.typingMode = GameState.Answering;
             currentTurn = Turn.PlayerA;
         }
-        currentGameState = GameState.TypingQuestion;
-        //currentTurn = (currentTurn == Turn.PlayerA) ? Turn.PlayerB : Turn.PlayerB;
-        //SwapTypingMode();
 
+        if(currentGameState != GameState.GameOver)
+        {
+            currentGameState = GameState.TypingQuestion;
 
-        StartCoroutine(PlayTurn());
-        ResetTimer();
+            StartCoroutine(PlayTurn());
+            ResetTimer();
+        }
 
-        //if (resetTimer)
-        //{
-        //    //ResetTimer();
-        //    //StartCoroutine(PlayTurn());
-        //}
 
     }
 
@@ -292,7 +291,18 @@ public class GameManager : MonoBehaviour
                 currentHiddenCharacterCount++;
             }                
         }
-
         return sb.ToString();
+    }
+
+    public void CheckDeath()
+    {
+        if (player1.fortHealth > 0 && player2.fortHealth > 0) return;
+
+        if(player1.fortHealth <= 0)
+            UIManager.Instance.ShowTurn("Player 2 WINS !");
+        else if(player2.fortHealth <= 0)
+            UIManager.Instance.ShowTurn("Player 1 WINS !");
+
+        UIManager.Instance.ShowGameOverText();
     }
 }

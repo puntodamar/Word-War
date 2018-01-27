@@ -7,7 +7,11 @@ public class UIManager : MonoBehaviour
     public static UIManager Instance;
     public Text showText;
     public Text timerText;
+    public Text infoText;
     public Image timerSlider;
+
+    public GameObject gameOverDialog;
+    public GameObject setDifficultyDialog;
 
     private float time;
 
@@ -31,6 +35,19 @@ public class UIManager : MonoBehaviour
     {
         timerSlider.fillAmount = 1;
         StartCoroutine(ShowTurnCoroutine(text));
+    }
+
+    public void ShowUI()
+    {
+        Debug.Log("called");
+        showText.gameObject.SetActive(true);
+        //infoText.gameObject.SetActive(true);
+        timerSlider.gameObject.transform.parent.gameObject.SetActive(true);
+    }
+
+    public void ShowInfo(string info, Color color)
+    {
+        StartCoroutine(ShowTextInfo(info, color));
     }
 
     public void SetTime(int time, GameState state)
@@ -58,10 +75,25 @@ public class UIManager : MonoBehaviour
         showText.text = "";
     }
 
+    IEnumerator ShowTextInfo(string text, Color color)
+    {
+        infoText.text = text;
+        infoText.color = color;
+        yield return new WaitForSeconds(1f);
+        infoText.text = "";
+    }
+
     public void ShowFormattedQuestion(string question)
     {
         showText.text = question;
     }
+
+    public void ShowGameOverText()
+    {
+        gameOverDialog.SetActive(true);
+    }
+
+
 
 
 
