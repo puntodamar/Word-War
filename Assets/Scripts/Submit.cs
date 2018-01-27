@@ -10,8 +10,9 @@ public class Submit : MonoBehaviour
         {
             if(GameManager.Instance.currentGameState == GameState.TypingQuestion)
                 GameManager.Instance.SubmitQuestion(inputAnswer.text);
+
             else if(GameManager.Instance.currentGameState == GameState.Answering)
-                GameManager.Instance.CheckAnswer(inputAnswer.text);
+                GameManager.Instance.CheckAnswer(inputAnswer.text, true);
         }
             
     }

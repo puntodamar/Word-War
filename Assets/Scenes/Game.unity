@@ -166,6 +166,11 @@ Prefab:
       propertyPath: healthText
       value: 
       objectReference: {fileID: 1411555142}
+    - target: {fileID: 114851121908447714, guid: 288bb68e9e9ee534fb2f7f8f89dae764,
+        type: 2}
+      propertyPath: typingMode
+      value: 2
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 288bb68e9e9ee534fb2f7f8f89dae764, type: 2}
   m_IsPrefabParent: 0
@@ -279,6 +284,25 @@ Prefab:
         type: 2}
       propertyPath: m_OnEndEdit.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
       value: SubmitInput
+      objectReference: {fileID: 0}
+    - target: {fileID: 1249817111095204, guid: 787cadc57c3076b41a4d8439ee53d4ce, type: 2}
+      propertyPath: m_TagString
+      value: PlayerInputField
+      objectReference: {fileID: 0}
+    - target: {fileID: 114748637785725578, guid: 787cadc57c3076b41a4d8439ee53d4ce,
+        type: 2}
+      propertyPath: m_ContentType
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 114748637785725578, guid: 787cadc57c3076b41a4d8439ee53d4ce,
+        type: 2}
+      propertyPath: m_KeyboardType
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 114748637785725578, guid: 787cadc57c3076b41a4d8439ee53d4ce,
+        type: 2}
+      propertyPath: m_CharacterValidation
+      value: 4
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 787cadc57c3076b41a4d8439ee53d4ce, type: 2}
@@ -404,6 +428,10 @@ Prefab:
         type: 2}
       propertyPath: m_OnEndEdit.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
       value: SubmitInput
+      objectReference: {fileID: 0}
+    - target: {fileID: 1249817111095204, guid: 787cadc57c3076b41a4d8439ee53d4ce, type: 2}
+      propertyPath: m_TagString
+      value: PlayerInputField
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 787cadc57c3076b41a4d8439ee53d4ce, type: 2}
@@ -776,6 +804,11 @@ Prefab:
       propertyPath: healthText
       value: 
       objectReference: {fileID: 1744062816}
+    - target: {fileID: 114851121908447714, guid: 288bb68e9e9ee534fb2f7f8f89dae764,
+        type: 2}
+      propertyPath: typingMode
+      value: 3
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 288bb68e9e9ee534fb2f7f8f89dae764, type: 2}
   m_IsPrefabParent: 0

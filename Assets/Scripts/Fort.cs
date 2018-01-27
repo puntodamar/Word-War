@@ -7,7 +7,7 @@ public class Fort : MonoBehaviour
 {
     public Text healthText;
     public Turn fortOwner;
-    public GameState typingStatus;
+    public GameState typingMode;
     public int fortHealth   = 100;
     public int streak       = 0;
     public int attack       = 10;
@@ -26,7 +26,7 @@ public class Fort : MonoBehaviour
     {
         float oldHealth = (float)health;
         float newHealth = health - damage;
-        Debug.Log(oldHealth + "---" + newHealth);
+
         while (oldHealth > newHealth)
         {
             oldHealth--;

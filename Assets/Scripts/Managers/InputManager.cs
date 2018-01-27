@@ -23,17 +23,19 @@ public class InputManager : MonoBehaviour
         inputWordPB.GetComponent<InputField>().text = "";
     }
 
-    public void ShowPlayerInputField(Turn turn)
+    public void ShowPlayerInputField(Turn turn, GameState player1TypingMode, GameState player2TypingMode)
     {
 
         if (turn == Turn.PlayerA)
         {
             inputWordPA.SetActive(true);
             InputField inputField = inputWordPA.GetComponent<InputField>();
-            inputField.Select();
-            if (GameManager.Instance.currentGameState == GameState.TypingQuestion)
+            inputField.ActivateInputField();
+            if (player1TypingMode == GameState.TypingQuestion)
                 inputField.placeholder.GetComponent<Text>().text = "Enter a word...";
-            else if (GameManager.Instance.currentGameState == GameState.Answering) inputField.placeholder.GetComponent<Text>().text = "Enter your answer...";
+
+            else if (player1TypingMode == GameState.Answering)
+                inputField.placeholder.GetComponent<Text>().text = "Enter your answer...";
 
 
         }
@@ -41,11 +43,22 @@ public class InputManager : MonoBehaviour
         {
             inputWordPB.SetActive(true);
             InputField inputField = inputWordPB.GetComponent<InputField>();
-            inputWordPB.GetComponent<InputField>().Select();
-
-            if (GameManager.Instance.currentGameState == GameState.TypingQuestion)
+            inputField.ActivateInputField();
+            if (player2TypingMode == GameState.TypingQuestion)
                 inputField.placeholder.GetComponent<Text>().text = "Enter a word...";
-            else if (GameManager.Instance.currentGameState == GameState.Answering) inputField.placeholder.GetComponent<Text>().text = "Enter your answer...";
+
+            else if (player2TypingMode == GameState.Answering)
+                inputField.placeholder.GetComponent<Text>().text = "Enter your answer...";
         }
+
+        GameObject[] inputs = GameObject.FindGameObjectsWithTag("PlayerInputField");
+        //for (int i = 0; i < inputs.Length; i++)
+        //{
+        //    if(inputs[i].act)
+        //    {
+        //        inputs[i].GetComponent<InputField>().Select();
+        //        break;
+        //    }
+        //}
     }
 }

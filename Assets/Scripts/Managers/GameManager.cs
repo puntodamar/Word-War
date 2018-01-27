@@ -6,6 +6,7 @@ using System.Text;
 public enum GameState { MainScreen, Options, Answering, TypingQuestion, DisableActions, GameOver, Paused }
 public enum Difficulty {  Easy, Medium, Hard }
 public enum Turn { PlayerA = 1, PlayerB }
+
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
@@ -21,14 +22,13 @@ public class GameManager : MonoBehaviour
     private float difficultyPercentage;
     private string correctAnswer;
     private bool isTimerActive;
+    private GameState lastPlayingState = GameState.Answering;
     
-
     private void Awake()
     {
         if (Instance == null) Instance = this;
         else if (Instance != this) Destroy(this);
-
-        
+       
     }
 
     private void Start()
@@ -61,71 +61,138 @@ public class GameManager : MonoBehaviour
         if (currentDifficulty == Difficulty.Hard)
             difficultyPercentage      = .5f;
 
+        currentGameState = GameState.TypingQuestion;
+        SwapTypingMode();
+        
+        //UpdateLastPlayingState();
+
         StartCoroutine(PlayTurn());
+    }
+
+    void SwapTypingMode()
+    {
+        switch (currentTurn)
+        {
+            case Turn.PlayerA:
+                player1.typingMode = GameState.TypingQuestion;
+                player2.typingMode = GameState.Answering;
+                break;
+            case Turn.PlayerB:
+                player1.typingMode = GameState.Answering;
+                player2.typingMode = GameState.TypingQuestion;
+                break;
+        }
     }
 
     void CountdownTimer()
     {
         if (currentTimerTime < 0) return;
         
+
+        // jika soal / jawaban kosong
         if(currentTimerTime == 0)
         {
             CancelInvoke("CountdownTimer");
-
-            if(currentGameState == GameState.TypingQuestion)
+            if(currentTurn == Turn.PlayerA)
             {
-                if (shownWord == "" || shownWord.Length > 2)
+                //if(player2.typingMode == GameState.Answering)
+                //{
+                //    player1.Attack(player2);
+                //    currentTurn = Turn.PlayerB;
+                //    //player1.typingMode = GameState.TypingQuestion;
+                //    //player2.typingMode = GameState.Answering;
+                //}
+
+                //if (player2.typingMode == GameState.TypingQuestion)
+                //{
+                //    player2.Attack(player1);
+
+                //}
+
+                if(player1.typingMode == GameState.TypingQuestion)
                 {
-                    if (currentTurn == Turn.PlayerA)
-                        player2.Attack(player1);
-                    else player1.Attack(player2);
+                    player2.Attack(player1);
+                    currentTurn = Turn.PlayerB;
                 }
             }
 
-            else if(currentGameState == GameState.Answering)
+            else if (currentTurn == Turn.PlayerB)
             {
-                CheckAnswer();
+                //if (player1.typingMode == GameState.Answering)
+                //{
+
+                //    player2.Attack(player1);
+                //    currentTurn = Turn.PlayerA;
+                //    //player1.typingMode = GameState.Answering;
+                //    //player2.typingMode = GameState.TypingQuestion;
+                //}   
+
+                //if(player1.typingMode == GameState.TypingQuestion)
+                //{
+                //    player1.Attack(player2);
+
+
+                //}
+
+                if (player2.typingMode == GameState.TypingQuestion)
+                {
+                    player1.Attack(player2);
+                    currentTurn = Turn.PlayerA;
+                }
             }
-            
-            currentTurn         = (currentTurn == Turn.PlayerA) ? Turn.PlayerB : Turn.PlayerA;
+
+            if (currentGameState == GameState.TypingQuestion)
+                currentGameState = GameState.TypingQuestion;
+
+            else if (currentGameState == GameState.Answering)
+                currentGameState = GameState.TypingQuestion;
+
+            SwapTypingMode();
+
             StartCoroutine(PlayTurn());
             ResetTimer();
         }
 
+        // UPDATE UI
         if(currentGameState == GameState.TypingQuestion || currentGameState == GameState.Answering)
         {
             currentTimerTime--;
             UIManager.Instance.SetTime(currentTimerTime, currentGameState);
         }
-
-
     }
 
     IEnumerator PlayTurn()
     {
-        shownWord = "";
-        correctAnswer = "";
-        InputManager.Instance.HideInputField();
+        shownWord       = "";
+        correctAnswer   = "";
+        GameState temp  = currentGameState;
         currentGameState = GameState.DisableActions;
+
+        InputManager.Instance.HideInputField();      
+       
         UIManager.Instance.ShowTurn("Player " + (int)currentTurn + "'s turn.");
 
         yield return new WaitForSecondsRealtime(InputManager.Instance.showInfoTimer);
         
-        InputManager.Instance.ShowPlayerInputField(currentTurn);
-        currentGameState = GameState.TypingQuestion;
+        InputManager.Instance.ShowPlayerInputField(currentTurn, player1.typingMode, player2.typingMode);
 
-        //switch (lastPlayingState)
-        //{
-        //    case GameState.TypingQuestion:
-        //        currentGameState = GameState.Answering;
-        //        break;
-        //    case GameState.Answering:
-        //        currentGameState = GameState.TypingQuestion;
-        //        break;
-        //}
-
-        //lastPlayingState = currentGameState;
+        currentGameState = temp;
         //ResetTimer();
+    }
+
+    void UpdateLastPlayingState()
+    {
+        switch (lastPlayingState)
+        {
+            case GameState.TypingQuestion:
+                currentGameState = GameState.Answering;
+                break;
+            case GameState.Answering:
+                currentGameState = GameState.TypingQuestion;
+                break;
+        }
+
+        lastPlayingState = currentGameState;
     }
 
     void ResetTimer()
@@ -136,43 +203,80 @@ public class GameManager : MonoBehaviour
 
     public void SubmitQuestion(string question)
     {
-        correctAnswer = question;
+        correctAnswer = question.ToLower();
         CancelInvoke("CountdownTimer");
-        currentTimerTime = 5;
         InputManager.Instance.HideInputField();
-        question    = FormatQuestion(question);
+        question    = FormatQuestion(correctAnswer);
         shownWord   = question;
         UIManager.Instance.ShowFormattedQuestion(question);
 
         currentGameState = GameState.Answering;
-        
+        SwapTypingMode();
         Turn showInput = (currentTurn == Turn.PlayerA) ? Turn.PlayerB : Turn.PlayerA;
-        InputManager.Instance.ShowPlayerInputField(showInput);
+        InputManager.Instance.ShowPlayerInputField(showInput, player1.typingMode, player2.typingMode);
         ResetTimer();
     }
 
-    public void CheckAnswer(string answer = "")
+    public void CheckAnswer(string answer = "", bool resetTimer = false)
     {
-        if(answer != correctAnswer && answer != "")
+        CancelInvoke("CountdownTimer");
+        answer = answer.ToLower();
+        Debug.Log("answer : " + answer + "---" + "correct : " + correctAnswer);
+
+        if (currentTurn == Turn.PlayerA)
         {
-            if (currentTurn == Turn.PlayerA)
+            Debug.Log("a");
+            // jika salah
+            if (answer != correctAnswer || answer == "")
+            {
                 player1.Attack(player2);
-            else
+            }
+
+            // jika benar
+            else if (answer == correctAnswer)
+            {
                 player2.Attack(player1);
-        }
-        else
-        {
-            if (currentTurn == Turn.PlayerA)
-                player2.Attack(player1);
-            else
-                player1.Attack(player2);
+
+            }
+
+            player1.typingMode  = GameState.Answering;
+            player2.typingMode  = GameState.TypingQuestion;
+            currentTurn         = Turn.PlayerB;
         }
 
+        else if(currentTurn == Turn.PlayerB)
+        {
+            Debug.Log("b");
+            // jika salah
+            if (answer != correctAnswer || answer == "")
+            {
+                player2.Attack(player1);
+            }
+
+            // jika benar
+            else if (answer == correctAnswer)
+            {
+                player1.Attack(player2);
+            }
+
+            player1.typingMode = GameState.TypingQuestion;
+            player2.typingMode = GameState.Answering;
+            currentTurn = Turn.PlayerA;
+        }
         currentGameState = GameState.TypingQuestion;
+        //currentTurn = (currentTurn == Turn.PlayerA) ? Turn.PlayerB : Turn.PlayerB;
+        //SwapTypingMode();
 
-        Turn showInput = (currentTurn == Turn.PlayerA) ? Turn.PlayerB : Turn.PlayerA;
+
         StartCoroutine(PlayTurn());
         ResetTimer();
+
+        //if (resetTimer)
+        //{
+        //    //ResetTimer();
+        //    //StartCoroutine(PlayTurn());
+        //}
+
     }
 
     string FormatQuestion(string question)
