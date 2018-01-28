@@ -1,0 +1,2 @@
+This is a turn based multiplayer game.
+Every turn, each player will type a word and the other will guess the missing character.
